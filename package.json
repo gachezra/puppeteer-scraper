@@ -7,8 +7,9 @@
     "start": "node --watch index.js"
   },
   "keywords": [],
-  "author": "Ives van Hoorne",
+  "author": "gachezra",
   "license": "MIT",
-  "devDependencies": {},
-  "dependencies": {}
+  "dependencies": {
+    "puppeteer": "^24.1.1"
+  }
 }
