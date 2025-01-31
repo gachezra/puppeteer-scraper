@@ -141,31 +141,37 @@ async function main() {
 //   });
 // }
 
-function cleanSequentialDuplicateLinks(events) {
-  // Set to keep track of all URLs we've seen
-  const seenUrls = new Set();
-
+function cleanSequentialReverseDuplicateLinks(events) {
   return events.map((event) => {
-    if (event.links && Array.isArray(event.links)) {
-      // Filter links, removing any URLs we've seen before
-      const cleanedLinks = event.links.filter((link) => {
-        if (!link.url) return false; // Skip entries without URLs
+    if (!event.links || !Array.isArray(event.links)) return event;
 
-        // If we haven't seen this URL before, keep it and add to seen URLs
-        if (!seenUrls.has(link.url)) {
-          seenUrls.add(link.url);
-          return true;
-        }
-        return false;
-      });
+    // Set to keep track of URLs already seen in the previous links
+    const seenUrls = new Set();
 
-      // Return new event object with cleaned links
-      return {
-        ...event,
-        links: cleanedLinks,
-      };
-    }
-    return event;
+    const cleanedLinks = [];
+
+    event.links.forEach((link, index, linksArr) => {
+      if (!link.url) return; // Skip if no URL
+
+      // Normalize URL (in case it's relative)
+      const normalizedUrl = link.url.startsWith("http")
+        ? link.url
+        : "http://whats-on-mombasa.com" + link.url;
+
+      // Extract the filename part from the URL
+      const fileName = normalizedUrl.split("/").pop();
+
+      // Check if the file has already been seen in previous links
+      if (seenUrls.has(fileName)) {
+        return; // Skip this link if its filename is already in a previous link
+      }
+
+      // Otherwise, add it to the cleaned links and mark the URL as seen
+      seenUrls.add(fileName);
+      cleanedLinks.push(link);
+    });
+
+    return { ...event, links: cleanedLinks };
   });
 }
 
@@ -179,14 +185,19 @@ app.get("/events", async (req, res) => {
   const events = await main();
 
   // Clean the duplicates from the result
-  const cleanedResult = cleanSequentialDuplicateLinks(events);
+  const cleanedResult = cleanSequentialReverseDuplicateLinks(events);
+
+  const filteredResult = cleanedResult.slice(0, 3).map((event) => ({
+    date: event.date,
+    links: event.links,
+  }));
 
   await fs.writeFile(
     "dates_with_links2.txt",
-    JSON.stringify(cleanedResult.slice(0, 3), null, 2)
+    JSON.stringify(filteredResult, null, 2)
   );
 
-  res.status(200).json(cleanedResult.slice(0, 3));
+  res.status(200).json(filteredResult.slice(0, 3));
 });
 
 const port = 27684;
