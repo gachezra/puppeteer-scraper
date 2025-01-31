@@ -145,28 +145,20 @@ function cleanSequentialReverseDuplicateLinks(events) {
   return events.map((event) => {
     if (!event.links || !Array.isArray(event.links)) return event;
 
-    // Set to keep track of URLs already seen in the previous links
     const seenUrls = new Set();
 
     const cleanedLinks = [];
 
     event.links.forEach((link, index, linksArr) => {
-      if (!link.url) return; // Skip if no URL
+      if (!link.url) return;
+      if (!link.text) return;
 
-      // Normalize URL (in case it's relative)
-      const normalizedUrl = link.url.startsWith("http")
-        ? link.url
-        : "http://whats-on-mombasa.com" + link.url;
+      const fileName = link.url;
 
-      // Extract the filename part from the URL
-      const fileName = normalizedUrl.split("/").pop();
-
-      // Check if the file has already been seen in previous links
       if (seenUrls.has(fileName)) {
-        return; // Skip this link if its filename is already in a previous link
+        return;
       }
 
-      // Otherwise, add it to the cleaned links and mark the URL as seen
       seenUrls.add(fileName);
       cleanedLinks.push(link);
     });
@@ -184,7 +176,6 @@ app.get("/", (req, res) => {
 app.get("/events", async (req, res) => {
   const events = await main();
 
-  // Clean the duplicates from the result
   const cleanedResult = cleanSequentialReverseDuplicateLinks(events);
 
   const filteredResult = cleanedResult.slice(0, 3).map((event) => ({
