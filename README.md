@@ -1,6 +1,6 @@
-# Puppeteer Table Scraper
+# Cheerio Table Scraper
 
-This is a simple Node.js script that uses Puppeteer to scrape all tables from a given website, extract their data, and sort them based on the first column.
+This is a simple Node.js script that uses Cheerio to scrape all tables from a given website, extract their data, and sort them based on the first column.
 
 ## Features
 
@@ -20,13 +20,13 @@ Ensure you have the following installed:
 
 1. Clone this repository or create a new directory and initialize a Node.js project:
    ```sh
-   git clone https://github.com/yourusername/puppeteer-scraper.git
-   cd puppeteer-scraper
+   git clone https://github.com/yourusername/cheerio-scraper.git
+   cd cheerio-scraper
    npm init -y
    ```
-2. Install Puppeteer:
+2. Install Cheerio:
    ```sh
-   npm install puppeteer
+   npm install cheerio
    ```
 
 ## Usage
